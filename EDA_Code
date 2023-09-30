@@ -1,0 +1,245 @@
+#importing Required library 
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
+%matplotlib inline
+
+#importing plotly Library
+from plotly.offline import iplot
+import plotly as py
+import plotly.tools as tls
+import cufflinks as cf
+py.offline.init_notebook_mode(connected=True) #Turning on notebook mode 
+cf.go_offline()
+
+#importing the datase
+df=pd.read_csv(r"spotify_dataset.csv")
+
+df.head()
+df.tail()
+
+df.sample(10)
+
+print('Number of Columns: ',df.shape[0])
+print("Number of rows: ",df.shape[1])
+
+df.isnull()
+df.isnull().sum()
+
+sns.heatmap(df.isnull(), cbar=False)
+del df["key"]
+sns.heatmap(df.isnull(), cbar=False)
+
+df.describe()
+df['artist(s)_name'].unique()
+
+pip install numpy==1.23.4
+
+uni=[]
+mul=[]
+for column in df.columns:
+    if df[column].nunique()>10:
+        mul.append(column)
+    else:
+        uni.append(column)
+uni
+
+df['mode'].value_counts()
+df['mode'].value_counts().plot.pie(fontsize= 20,autopct ='%.2f')
+#plt.figure(figsize=(8, 8))
+df['artist_count'].value_counts()
+
+df['artist_count'].value_counts().plot.pie(fontsize= 8,autopct ='%.2f')
+#plt.figure(figsize=(8, 8))
+
+sns.displot(df['mode'],kde=True)
+sns.displot(df['artist_count'],kde=True)
+df['artist_count'].skew()
+
+sns.boxplot(df['artist_count'])
+
+# Top 10 artists with most songs in the dataset
+top_artists = df['artist(s)_name'].value_counts().head(10)
+
+# Plot
+plt.figure(figsize=(12, 6))
+sns.barplot(x=top_artists.values, y=top_artists.index, palette='viridis')
+plt.xlabel('Number of Songs')
+plt.ylabel('Artist(s) Name')
+plt.title('Top 10 Artists with Most Songs')
+plt.show()
+
+top_artists
+
+# Top 10 artists with most songs in the dataset
+top_artists = df['artist(s)_name'].value_counts().head(10)
+
+# Plot
+plt.figure(figsize=(12, 6))
+sns.lineplot(x=top_artists.values, y=top_artists.index, palette='viridis')
+plt.xlabel('Number of Songs')
+plt.ylabel('Artist(s) Name')
+plt.title('Top 10 Artists with Most Songs')
+plt.show()
+
+top_artists
+
+# Remove non-numeric values from 'streams' column and convert to integer
+df['streams'] = pd.to_numeric(df['streams'], errors='coerce')
+
+# Top 10 songs with most streams on Spotify
+top_spotify_streams = df[['track_name', 'artist(s)_name', 'streams']].sort_values(by='streams', ascending=False).head(10)
+
+# Plot
+plt.figure(figsize=(12, 6))
+sns.barplot(x=top_spotify_streams['streams'], y=top_spotify_streams['track_name'], palette='viridis')
+plt.xlabel('Streams (in billions)')
+plt.ylabel('Track Name')
+plt.title('Top 10 Songs with Most Streams on Spotify')
+plt.xticks(rotation=45)
+plt.show()
+
+top_spotify_streams
+
+# Top 5 songs with most streams on Spotify
+top_spotify_streams1 = df[['track_name', 'artist(s)_name', 'streams']].sort_values(by='streams', ascending=False).head(5)
+
+# Plot
+plt.figure(figsize=(12, 6))
+sns.lineplot(x=top_spotify_streams1['streams'], y=top_spotify_streams1['track_name'], palette='viridis')
+plt.xlabel('Streams (in billions)')
+plt.ylabel('Track Name')
+plt.title('Top 5 Songs with Most Streams on Spotify')
+plt.xticks(rotation=45)
+plt.show()
+
+top_spotify_streams1
+
+# Top 10 songs with highest presence in Apple Music playlists
+top_apple_playlists = df[['track_name', 'artist(s)_name', 'in_apple_playlists']].sort_values(by='in_apple_playlists', ascending=False).head(10)
+
+# Plot
+plt.figure(figsize=(12, 6))
+sns.barplot(x=top_apple_playlists['in_apple_playlists'], y=top_apple_playlists['track_name'], palette='viridis')
+plt.xlabel('Number of Apple Music Playlists')
+plt.ylabel('Track Name')
+plt.title('Top 10 Songs with Highest Presence in Apple Music Playlists')
+plt.xticks(rotation=45)
+plt.show()
+
+top_apple_playlists
+
+# Top 10 songs with highest presence in Spotify playlists
+top_spotify_playlist = df[['in_spotify_playlists','track_name']].sort_values(by='in_spotify_playlists',ascending=True).head(10)
+
+#Plot
+plt.figure(figsize=(12, 6))
+sns.barplot(x=top_spotify_playlist['in_spotify_playlists'], y=top_spotify_playlist['track_name'],palette='viridis')
+plt.xlabel('Number of Spotify playlist')
+plt.ylabel('Track Name')
+plt.title('Top 10 Songs with Highest Presence in spotify playlist')
+plt.xticks(rotation=45)
+plt.show()
+
+top_spotify_playlist
+
+
+# Top 10 songs with highest presence in deezer playlist
+top_deezer_charts=df[['track_name', 'artist(s)_name', 'in_deezer_charts']].sort_values(by='in_deezer_charts', ascending=False).head(10)
+
+# Plot
+plt.figure(figsize=(12, 6))
+sns.barplot(x=top_deezer_charts['in_deezer_charts'], y=top_deezer_charts['artist(s)_name'], palette='viridis')
+plt.xlabel('Numbers in deezer charts')
+plt.ylabel('Name of the Artist')
+plt.title('Top artist present in deezer charts')
+plt.xticks(rotation=45)
+plt.show()
+top_deezer_charts
+
+# Plot histogram for danceability
+plt.figure(figsize=(10, 6))
+sns.histplot(df['danceability_%'], bins=20, kde=True, color='purple')
+plt.xlabel('Danceability (%)')
+plt.ylabel('Frequency')
+plt.title('Distribution of Danceability')
+plt.show()
+
+# Calculate average danceability for each year
+average_danceability_by_year = df.groupby('released_year')['danceability_%'].mean()
+
+# Plot trends in danceability over the years
+plt.figure(figsize=(10, 6))
+sns.lineplot(x=average_danceability_by_year.index, y=average_danceability_by_year.values, color='blue')
+plt.xlabel('Year')
+plt.ylabel('Average Danceability (%)')
+plt.title('Trends in Danceability Over the Years')
+plt.xticks(rotation=45)
+plt.show()
+
+# Remove non-numeric values from 'in_deezer_playlists','in_shazam_charts' column and convert to integer
+df['in_deezer_playlists'] = pd.to_numeric(df['in_deezer_playlists'], errors='coerce')
+df['in_shazam_charts'] = pd.to_numeric(df['in_shazam_charts'], errors='coerce')
+
+# Select columns for cross-platform metrics
+cross_platform_columns = [
+    'in_spotify_playlists', 'in_spotify_charts', 'in_apple_playlists', 
+    'in_apple_charts', 'in_deezer_playlists', 'in_deezer_charts', 'in_shazam_charts'
+]
+
+# Calculate the correlation matrix
+correlation_matrix = df[cross_platform_columns].corr()
+# Plot the heatmap
+plt.figure(figsize=(10, 8))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', center=0)
+plt.title('Correlation Heatmap: Cross-Platform Metrics')
+plt.show()
+
+# Select columns for audio features and popularity
+audio_features_columns = ['danceability_%', 'energy_%', 'valence_%']
+popularity_column = 'streams'
+
+# Create scatter plots
+plt.figure(figsize=(15, 5))
+for idx, feature in enumerate(audio_features_columns, start=1):
+    plt.subplot(1, 3, idx)
+    sns.scatterplot(x=df[feature], y=df[popularity_column], color='blue', alpha=0.5)
+    plt.xlabel(feature.replace('_', ' ').title())
+    plt.ylabel('Number of Streams')
+    plt.title(f'{feature.replace("_", " ").title()} vs. Number of Streams')
+
+plt.tight_layout()
+plt.show()
+
+# Select columns for audio features and popularity
+audio_features_columns = ['danceability_%', 'energy_%', 'valence_%']
+popularity_column = 'streams'
+
+# Create scatter plots
+plt.figure(figsize=(12, 4))
+for feature in audio_features_columns:
+    sns.scatterplot(data=df, x=feature, y=popularity_column, alpha=0.5, label=feature.replace('_', ' ').title())
+
+plt.xlabel('Audio Feature')
+plt.ylabel('Number of Streams')
+plt.title('Relationship Between Audio Features and Song Popularity')
+plt.legend()
+plt.show()
+
+import plotly.express as px
+
+# Create box plot for Valence distribution by Year
+fig = px.box(df, x='released_year', y='valence_%', title='Valence Distribution by Year')
+fig.update_layout(xaxis_title='Year', yaxis_title='Valence (%)')
+fig.show()
+
+
+
+
+
+
+
+
